@@ -42,45 +42,38 @@ avg_chord_lengths = [0.02, 0.0275, 0.04] % m
 
 Re_values = zeros(length(cruise_speeds), length(avg_chord_lengths), length(kin_visc_air));
 
+% Calculate reynolds numbers for each cruise speed,
+% chord length, and kin visc of air.
 for i = 1:length(cruise_speeds)
     for j = 1:length(avg_chord_lengths)
         for k = 1:length(kin_visc_air)
             Re_values(i, j, k) = (cruise_speeds(i) * avg_chord_lengths(j)) / kin_visc_air(k);
+            % fprintf('Cruise Speed: %.2f\nChord Length: %.2f\nKin Visc Air: %.2f\nReynolds Number: %.2f\n\n', cruise_speeds(i), avg_chord_lengths(j), kin_visc_air(k), Re_values(i,j,k))
         end
     end
 end
 
-% Create a meshgrid for plotting
-[SpeedGrid, ViscosityGrid] = meshgrid(cruise_speeds, kin_visc_air);
+% Plot Reynolds 3D maps keeping chord length constant
+for j = 1:length(avg_chord_lengths)
+    figure;
 
-for i = 1:length(avg_chord_lengths)
-    % % Plotting the surface for the second chord length
-    % figure;
-    % surf(SpeedGrid, ViscosityGrid, squeeze(Re_values(:,:,i))); % Using the last chord length
-    % xlabel('Cruise Speed (m/s)');
-    % ylabel('Kinematic Viscosity (m^2/s)');
-    % zlabel('Reynolds Number');
-    % title(['Reynolds Number for Chord Length: ' num2str(avg_chord_lengths(i)) ' meters']);
-    % 
-    % % Display the plot
-    % shading interp;  % Smooth the colors of the surface
-    % colorbar;  % Add color bar to indicate the Reynolds number magnitude
-    % grid on;
-
-    % Create a meshgrid for plotting
+    % Generate meshgrid for cruise speed and temperature
     [SpeedGrid, TempGrid] = meshgrid(cruise_speeds, temps);
     
-    % Plotting the surface for the second chord length
-    figure;
-    surf(SpeedGrid, TempGrid, squeeze(Re_values(:,:,i))); % Using the second chord length
-    xlabel('Cruise Speed (m/s)');
-    ylabel('Temperature (°C)');  % Label temperature on the Y-axis
-    zlabel('Reynolds Number');
-    title(['Reynolds Number for Chord Length: ' num2str(avg_chord_lengths(i)) ' meters']);
+    % Extract correct slice of Reynolds number matrix
+    Re_surface = squeeze(Re_values(:, j, :))';  % Transpose to align correctly
+
+    % Surface plot
+    surf(SpeedGrid, TempGrid, Re_surface);
     
-    % Display the plot
-    shading interp;  % Smooth the colors of the surface
-    colorbar;  % Add color bar to indicate the Reynolds number magnitude
+    xlabel('Cruise Speed (m/s)');
+    ylabel('Temperature (°C)');
+    zlabel('Reynolds Number');
+    title(['Reynolds Number for Chord Length: ' num2str(avg_chord_lengths(j)) ' m']);
+    
+    % Visualization improvements
+    shading interp;
+    colorbar;
     grid on;
 end
 %% Forces
@@ -125,14 +118,14 @@ rho_fit = polyval(coeffs, T_fit);
 
 % Airfoil: http://airfoiltools.com/airfoil/details?airfoil=df102-il
 Cl = 0.25; % [dimensionless], measured at alpha = 0.005
-V = 32; % [m/s], chosen from Reynolds 3D maps
+V = 25.2; % [m/s], chosen from Reynolds 3D maps
 
 % Density of Air at 18°C
 T = 18;
 rho = polyval(coeffs, T) % [kg/m3]
 
 % Average Wing Chord Length
-c = 0.2; % [m]
+c = 0.4; % [m]
 % Wing span
 b = 1.3; % [m]
 % Wing area
