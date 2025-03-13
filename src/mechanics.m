@@ -1,9 +1,13 @@
 clc; clear; close all;
 format compact;
 
+% load aerodynamics.mat
+% requires you to have run aerodynamics.m
+vars = load("aerodynamics.mat");
+
 % Force on the Wing Spars
-FL = 50.12; % N
-FW = 14.73; % N
+FL = vars.FL % N
+FW = vars.FW % N
 
 % % Net Load on both wings
 F_wing = FL - FW % N
@@ -14,11 +18,13 @@ F_spar = F_wing/2
 b = 1.30; % m
 % Airfoil Maximum Thickness
 h = 0.03; % m
-% Cross-sectional area of airfoils
-A = b*h
+% Length of beam
+L = b/2 % m
+% Cross-sectional area of airfoil (assuming rectangle)
+A = L*h
 
 % Stress
-sigma = F_wing/A % Pa
+sigma = F_wing/A % Pa (N/m²)
 
 % Young's Modulus for Plywood
 E = 10E9;
@@ -26,18 +32,16 @@ E = 10E9;
 % Strain
 epsilon = sigma/E
 
-% Length of beam
-L = b/2 % m
 % Line Pressure Load aka
 % Lift per unit length of wing
-p = FL/b % N/m
+p = FL/L % N/m (Force distributed along the length)
 
 % Distance from Neutral Axis
 % to Extreme Fibers
 c = h/2 % m
 
 % Moment of Inerta
-I = 1/12*b*h^3 % kg/m^2
+I = 1/12*L*h^3 % kg/m^2
 
 % Maximum Moment
 M_max = (L^2*p)/2 % Nm

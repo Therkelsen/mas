@@ -54,28 +54,28 @@ for i = 1:length(cruise_speeds)
 end
 
 % Plot Reynolds 3D maps keeping chord length constant
-for j = 1:length(avg_chord_lengths)
-    figure;
-
-    % Generate meshgrid for cruise speed and temperature
-    [SpeedGrid, TempGrid] = meshgrid(cruise_speeds, temps);
-    
-    % Extract correct slice of Reynolds number matrix
-    Re_surface = squeeze(Re_values(:, j, :))';  % Transpose to align correctly
-
-    % Surface plot
-    surf(SpeedGrid, TempGrid, Re_surface);
-    
-    xlabel('Cruise Speed (m/s)');
-    ylabel('Temperature (°C)');
-    zlabel('Reynolds Number');
-    title(['Reynolds Number for Chord Length: ' num2str(avg_chord_lengths(j)) ' m']);
-    
-    % Visualization improvements
-    shading interp;
-    colorbar;
-    grid on;
-end
+% for j = 1:length(avg_chord_lengths)
+%     figure;
+% 
+%     % Generate meshgrid for cruise speed and temperature
+%     [SpeedGrid, TempGrid] = meshgrid(cruise_speeds, temps);
+% 
+%     % Extract correct slice of Reynolds number matrix
+%     Re_surface = squeeze(Re_values(:, j, :))';  % Transpose to align correctly
+% 
+%     % Surface plot
+%     surf(SpeedGrid, TempGrid, Re_surface);
+% 
+%     xlabel('Cruise Speed (m/s)');
+%     ylabel('Temperature (°C)');
+%     zlabel('Reynolds Number');
+%     title(['Reynolds Number for Chord Length: ' num2str(avg_chord_lengths(j)) ' m']);
+% 
+%     % Visualization improvements
+%     shading interp;
+%     colorbar;
+%     grid on;
+% end
 %% Forces
 clc; clear; close all;
 format compact;
@@ -133,7 +133,7 @@ b = 1.3; % [m]
 A = c*b; % [m^2]
 
 % Lift
-L = 1/2*rho*V^2*A*Cl; % N
+FL = 1/2*rho*V^2*A*Cl; % N
 
 fprintf(['Average Wing Chord Length\n' ...
     '  c = %.2f [m]\n' ...
@@ -146,7 +146,7 @@ fprintf(['Average Wing Chord Length\n' ...
     'Velocity:\n' ...
     '  V = %.2f\n' ...
     'Lift Force:\n' ...
-    '  L = 1/2*rho*V^2*A*Cl = %.2f [N]\n\n'], c, b, A, Cl, V, L)
+    '  L = 1/2*rho*V^2*A*Cl = %.2f [N]\n\n'], c, b, A, Cl, V, FL)
 
 % Weight of drone
 m_max = 1.5; % [kg]
@@ -162,7 +162,7 @@ m = m_comp + m_body;
 
 g = 9.82; % m/s^2
 
-W = m*g;
+FW = m*g;
 
 fprintf(['Weight Calculations\n' ...
     'Max Weight:\n' ...
@@ -185,13 +185,13 @@ fprintf(['Weight Calculations\n' ...
     '  g = %.2f [m/s^2]\n' ...
     'Weight:\n' ...
     '  W = m*g = %.2f [N]\n\n'], ...
-    m_max, m_payload, m_motor, m_servo, m_battery, m_comp, m_body, m, g, W)
+    m_max, m_payload, m_motor, m_servo, m_battery, m_comp, m_body, m, g, FW)
 
 % Lift-to-weight ratio
-LWR = L/W;
+LWR = FL/FW;
 
 % Is the lift enough to counteract weight of drone?
-if (L>W)
+if (FL>FW)
     fprintf('Yes, we have enough lift!')
 else
     fprintf('No, we do not have enough lift!')
@@ -202,14 +202,14 @@ fprintf('\nL/W Ratio: %.2f\n\n', LWR)
 
 Cd = 0.01; % Extracted from Cl/Cd graph.
 % Drag
-D = 1/2*rho*V^2*A*Cd % N
+FD = 1/2*rho*V^2*A*Cd % N
 
 fprintf(['Drag Calculations:\n' ...
     'Coefficient of Drag:\n' ...
     '  Cd = %.2f\n' ...
     'Drag:\n' ...
     '  D = 1/2*rho*V^2*A*Cd = %.2f [N]\n\n'], ...
-    Cd, D)
+    Cd, FD)
 
 % THRUST CALCULATIONS
 m = 2.3; % Max "thrust" of motor
@@ -217,7 +217,7 @@ m = 2.3; % Max "thrust" of motor
 T_static = m * g; % N, when static. Theoretical number, will be smaller when in flight.
 
 % Thrust-to-drag ratio
-TDR = T/D;
+TDR = T/FD;
 
 fprintf(['Thrust Calculations:\n' ...
     'Max Thrust of Motor:\n' ...
@@ -227,9 +227,12 @@ fprintf(['Thrust Calculations:\n' ...
     m, T_static)
 
 % Is the thrust enough to counteract drag of drone?
-if (T>D)
+if (T>FD)
     disp('Yes, we have enough thrust!')
 else
     disp('No, we do not have enough thrust!')
 end
 fprintf('T/D Ratio: %.2f\n', TDR)
+
+% Export Variables
+save("aerodynamics.mat")
