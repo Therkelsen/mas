@@ -7,24 +7,18 @@ vars = load("aerodynamics.mat");
 
 % Force on the Wing Spars
 FL = vars.FL % N
-FW = vars.FW % N
-
-% % Net Load on both wings
-F_wing = FL - FW % N
-% % Per wing
-F_spar = F_wing/2
 
 % Wing Span
-b = 1.30; % m
+b = vars.b % m
 % Airfoil Maximum Thickness
-h = 0.03; % m
+h = 0.025; % m
 % Length of beam
 L = b/2 % m
 % Cross-sectional area of airfoil (assuming rectangle)
 A = L*h
 
 % Stress
-sigma = F_wing/A % Pa (N/m²)
+sigma = FL/A % Pa (N/m²)
 
 % Young's Modulus for Plywood
 E = 10E9;
@@ -48,3 +42,6 @@ M_max = (L^2*p)/2 % Nm
 
 % Maximum Stress
 sigma_max = (abs(M_max)*c)/I % Pa
+
+% Export Variables
+save("mechanics.mat")
