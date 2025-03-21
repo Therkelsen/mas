@@ -96,9 +96,9 @@ FD = 1/2*rho*Vcruise^2*A*Cd; % Drag Force [N]
 fprintf(['\nDRAG\nDrag Force:\n  FD = %.2f [N]\n'], FD)
 
 %% Thrust Stuff
-m = 2.3; % Max "thrust" of motor
+Tmax = 2.3; % Max "thrust" of motor
 % Static thrust
-Tstatic = m * g; % N, when static. Theoretical number, will be smaller when in flight.
+Tstatic = Tmax * g; % N, when static. Theoretical number, will be smaller when in flight.
 Treq = FD % Required thrust to counteract Drag [N]
 
 fprintf(['\nTHRUST\nMax Thrust Spec:\n  m = %.2f' ...
