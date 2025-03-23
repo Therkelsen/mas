@@ -24,14 +24,15 @@ nu = nu_fit(2);
 b = 1; % Wing span [m]
 c = 0.25; % Chord Length [m]
 A = c*b; % Wing Area [m^2]
-Vcruise = 25; % Cruise Speed [m/s]
+t = 0.025; % Airfoil Maximum Thickness [m]
+vcruise = 25; % Cruise Speed [m/s]
 fprintf('\nWing Area = Wing Span x Chord Length\n  A = b x c\n    = %i [m] x %.2f [m]\n    = %.2f [m^2]\n', b, c, A)
 
-Re = (Vcruise * c) / nu;
+Re = (vcruise * c) / nu;
 
 fprintf(['\nKinematic Viscosity at T = %i °C:\n  ν = %i [m^2/s]' ...
-    '\nCruise Speed:\n  Vcruise = %.2f [m/s]\n' ...
-    '\nReynolds Number:\n  Re = %i\n'], T, nu, Vcruise, Re)
+    '\nCruise Speed:\n  vcruise = %.2f [m/s]\n' ...
+    '\nReynolds Number:\n  Re = %i\n'], T, nu, vcruise, Re)
 
 %% Weight Stuff
 g = 9.82; % Gravity [N]
@@ -63,10 +64,10 @@ fprintf('\nLIFT\nDensity of Air at %i°C:\n  ρ = %.4f [kg/m3]\n', T, rho)
 
 % Airfoil: http://airfoiltools.com/airfoil/details?airfoil=sd7037-il
 % Cl = 0.4; % [dimensionless], measured at alpha = 0%
-% FL = 1/2*rho*Vcruise^2*A*Cl; % N
+% FL = 1/2*rho*vcruise^2*A*Cl; % N
 FL = FW;
-% Vcruise = sqrt((2*FL)/(rho*A*Cl));
-Cl = (2*FL)/(rho*Vcruise^2*A);
+% vcruise = sqrt((2*FL)/(rho*A*Cl));
+Cl = (2*FL)/(rho*vcruise^2*A);
 
 fprintf(['Lift Force:\n' ...
     '  FL = %.2f [N]\n' ...
@@ -91,7 +92,7 @@ else
 end
 
 %% Drag Stuff
-FD = 1/2*rho*Vcruise^2*A*Cd; % Drag Force [N]
+FD = 1/2*rho*vcruise^2*A*Cd; % Drag Force [N]
 
 fprintf(['\nDRAG\nDrag Force:\n  FD = %.2f [N]\n'], FD)
 
@@ -119,7 +120,7 @@ else
 end
 fprintf('\nT/D Ratio: %.2f\n', SRR)
 
-Preq = Treq * Vcruise; % Required power for level flight [W]
+Preq = Treq * vcruise; % Required power for level flight [W]
 
 eta_prop = 0.8; % Propellor efficiency
 eta_motor = 0.85; % Motor efficiency
@@ -127,7 +128,7 @@ eta_motor = 0.85; % Motor efficiency
 Pelec = Preq/(eta_prop * eta_motor); % Electrical power input
 
 fprintf(['\nPOWER\nRequired Power:\n' ...
-    '  Preq = Treq x Vcruise\n' ...
+    '  Preq = Treq x vcruise\n' ...
     '      = %.2f [N] x %.2f [m/s]\n' ...
     '      = %.2f [W]\n' ...
     'Propeller Efficiency:\n  ηprop = %i%%\n' ...
@@ -136,7 +137,7 @@ fprintf(['\nPOWER\nRequired Power:\n' ...
     '  Pelec = Preq/(ηprop * ηmotor)\n' ...
     '        = %.2f [W]' ...
     '\n'], ...
-    Treq, Vcruise, Preq, eta_prop*100, eta_motor*100, Pelec)
+    Treq, vcruise, Preq, eta_prop*100, eta_motor*100, Pelec)
 
 Vcell = 3.7; % Cell nominal voltage [V]
 Vbattery = 4*Vcell; % Battery nominal voltage [V]
@@ -173,17 +174,17 @@ Cdstall = 0.05; % Coefficient of Drag at Stall
 alphastall = 14; % Degrees
 
 % Stall Speed
-Vstall = sqrt((2*m*g)/(rho*A*Clstall));
+vstall = sqrt((2*m*g)/(rho*A*Clstall));
 
 fprintf(['\nSTALL\nLift Coefficient at Stall:\n  Clstall = %.2f\n' ...
     'Drag Coefficient at Stall:\n  Cldrag = %.2f\n' ...
-    'Stall Speed: \n  Vstall = %.2f\n'], Clstall, Cdstall, Vstall)
+    'Stall Speed: \n  vstall = %.2f\n'], Clstall, Cdstall, vstall)
 
 % Cruise to Stall ratio
-CSR = Vcruise/Vstall;
+CSR = vcruise/vstall;
 
 % Is our cruise speed higher than our stall speed?
-if (Vcruise>Vstall)
+if (vcruise>vstall)
     fprintf('\nYes, our cruise speed is\nhigh enough to not stall!')
 else
     fprintf('\nNo, our cruise speed is\nnot high enough to not stall!')

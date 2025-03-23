@@ -6,7 +6,7 @@ vars = load("aerodynamics.mat");
 
 %% Step 1: Define Basic Parameters
 m = vars.m; % Drone mass [kg]
-Vdash = 40; % Dash speed [m/s]
+vdash = 40; % Dash speed [m/s]
 n = 5; % Load Factor (G-force)
 g = vars.g; % Gravity [m/s^2]
 
@@ -18,13 +18,13 @@ L = b/2; % Spar length (half wingspan) [m]
 
 fprintf(['\nBASIC PARAMETERS\n' ...
     'Drone Mass:\n  m = %.2f [kg]\n' ...
-    'Dash Speed:\n  Vdash = %.2f [m/s]\n' ...
+    'Dash Speed:\n  vdash = %.2f [m/s]\n' ...
     'Load Factor:\n  n = %.2f [G]\n' ...
     'Gravity:\n  g = %.2f [m/s^2]\n' ...
     'Wingspan:\n  b = %.2f [m]\n' ...
     'Spar Height:\n  h = %.3f [m]\n' ...
     'Spar Depth:\n  d = %.3f [m]\n' ...
-    'Spar Length:\n  L = %.2f [m]\n'], m, Vdash, n, g, b, h, d, L);
+    'Spar Length:\n  L = %.2f [m]\n'], m, vdash, n, g, b, h, d, L);
 
 %% Step 2: Compute Worst-Case Aerodynamic Forces
 FW = m * g; % Weight force of drone [N]
@@ -47,7 +47,8 @@ fprintf(['\nSTRESS CALCULATION\nMaximum Moment:\n  M_max = %.4f [Nm]\n' ...
     'Moment of Inertia:\n  I = %.6e [m^4]\n' ...
     'Maximum Stress:\n  σmax = %.4f [Pa]\n       = %.4f [MPa]\n'], Mmax, I, sigmamax, sigmamax/(1E6));
 
-%% Step 4: Material Selection (Balsa Wood)
+%% Step 4: Material Selection
+%% Balsa Wood
 Ebalsa = 2.1E9; % Young's Modulus for Balsa [Pa]
 epsilon_balsa = sigmamax / Ebalsa; % Strain
 
@@ -72,7 +73,7 @@ else
 end
 fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_balsa/sigmamax, comp_balsa/sigmamax);
 
-%% Step 5: Material Selection (XPS Foam)
+%% XPS Foam
 Exps = 3.34E9; % Young's Modulus for XPS [Pa]
 epsilon_xps = sigmamax / Exps;
 
@@ -95,6 +96,39 @@ else
     fprintf('\n  ✗ NOT strong enough in compression.');
 end
 fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_xps/sigmamax, comp_xps/sigmamax);
+
+%% Carbon Fiber / Epoxy Rods
+Ecfrp = 10E9; % Young's Modulus for CFRP [Pa]
+epsilon_cfrp = sigmamax / Ecfrp;
+
+tens_cfrp = 1900E6; % Tensile Strength [Pa]
+comp_cfrp = 1300E6; % Compressive Strength [Pa]
+
+fprintf(['\nCARBON FIBER / EPOXY RODS\nYoung’s Modulus:\n  Ecfrp = %g [Pa]\nStrain:\n  εcfrp = %.2e\n' ...
+    'Tensile Strength:\n  σt = %i [Pa]\n' ...
+    'Compressive Strength:\n  σc = %i [Pa]\n'], Ecfrp, epsilon_cfrp, tens_cfrp, comp_cfrp);
+% Check if XPS is strong enough
+fprintf('\nCFRP Material Strength Check:');
+if tens_cfrp > sigmamax
+    fprintf('\n  ✓ Strong enough in tension.');
+else
+    fprintf('\n  ✗ NOT strong enough in tension.');
+end
+if comp_cfrp > sigmamax
+    fprintf('\n  ✓ Strong enough in compression.');
+else
+    fprintf('\n  ✗ NOT strong enough in compression.');
+end
+fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_cfrp/sigmamax, comp_cfrp/sigmamax);
+
+%% Weight of Beam
+Vbeam = L*d*h; % Beam Volume [m^3]
+rhobalsa = 160; % Balsa Density [kg/m^3]
+mbeam = Vbeam*rhobalsa; % Beam Mass [kg]
+
+fprintf(['\nBEAM WEIGHT\nBeam Volume:\n  Vbeam = L x d x h\n        = %g [kg^3]\n' ...
+    'Balsa Density:\n  rhobalsa = %i [kg/m^3]\n' ...
+    'Beam Mass:\n  mbeam = Vbeam x rhobalsa\n        = %g [kg]\n'], Vbeam, rhobalsa, mbeam)
 
 %% Step 6: Export Data
 save("wing_beam_materials.mat")
