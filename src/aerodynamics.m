@@ -9,7 +9,6 @@ nu = [1.34E-05, 1.48E-05, 1.57E-05]; % Kinematic viscosity in m^2/s
 
 coeffs = polyfit(T, nu, 1);
 
-% disp('Linear Fit Equation: nu(T) = ');
 % disp([num2str(coeffs(1), '%.5e') ' * T + ' num2str(coeffs(2), '%.5e')])
 
 temps = [9, 18, 30]; % min, avg, max, in °C
@@ -100,7 +99,7 @@ FD = 1/2*rho*vcruise^2*Awing*Cd; % Drag Force [N]
 fprintf(['\nDRAG\nDrag Force:\n  FD = %.2f [N]\n'], FD)
 
 %% Thrust Calculation
-Dprop = 12 * 0.0254; % Propeller diameter [m] (12 in converted to m)
+Dprop = 9 * 0.0254; % Propeller diameter [m] (12 in converted to m)
 rprop = Dprop / 2; % Propeller radius [m]
 Aprop = pi * rprop^2; % Propeller disk area [m^2]
 
