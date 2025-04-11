@@ -173,3 +173,5 @@ else
     fprintf('    ✓ Can handle the compressive stress.\n');
 end
 fprintf('       Compressive Strength Ratio: %.2f\n', GFRP_compressive_strength / stress_force);
+
+save('motor_mount_materials.mat')

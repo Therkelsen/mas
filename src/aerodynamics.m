@@ -21,7 +21,7 @@ nu_fit = polyval(coeffs, T_fit);
 T = temps(2);
 nu = nu_fit(2);
 
-b = 1; % Wing span [m]
+b = 0.65; % Wing span [m]
 c = 0.25; % Chord Length [m]
 Awing = c*b; % Wing Area [m^2]
 t = 0.025; % Airfoil Maximum Thickness [m]
@@ -45,7 +45,7 @@ m_max = 1.5; % [kg]
 m_payload = 0.4; % [kg]
 m_motor = 0.175; % [kg]
 m_servo = 0.018; % [kg]
-m_battery = 0.152; % [kg]
+m_battery = 0.120; % [kg]
 
 m_comp = m_payload + m_motor + 3*m_servo + m_battery;
 m_body = m_max - m_comp;
