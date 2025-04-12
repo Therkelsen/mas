@@ -6,62 +6,66 @@ aero = load("aerodynamics.mat");
 beam = load("wing_spar_materials.mat");
 
 m = aero.m; % Drone mass [kg]
-mcomp = aero.m_comp; % Component mass [kg]
-mbeam = beam.mbeam; % Beam mass [kg]
+m_comp = aero.m_comp; % Component mass [kg]
+m_beam = beam.mbeam; % Beam mass [kg]
 g = aero.g; % Gravity [m/s^2]
 
-mbody = m - mcomp - 2*mbeam; % Available weight left for body [kg]
+m_body = m - m_comp - m_beam; % Available weight left for body [kg]
 
-fprintf(['\nDRONE PARAMETERS\nMass of Drone:\n  m = %.2f [kg]\n' ...
-    'Mass of Components:\n  mcomp = %.2f [kg]\n' ...
-    'Mass of Beam:\n  mbeam = %g [kg]\n' ...
-    'Mass of Body:\n  mbody = m - mcomp - 2 x mbeam\n        = %.2f [kg]\n'], m, mcomp, mbeam, mbody);
+fprintf('\nDRONE MASS BUDGET\n');
+fprintf('  Total Drone Mass:\n    m = %.2f [kg]\n', m);
+fprintf('  Component Mass:\n    m_comp = %.2f [kg]\n', m_comp);
+fprintf('  Beam Mass:\n    m_beam = %.2f [kg]\n', m_beam);
+fprintf('  Remaining for Body:\n    m_body = %.2f [kg]\n', m_body);
 
 %% Is material light enough?
-b = aero.b; % Wingspan [m]
-c = aero.c; % Chord Length [m]
-A = aero.Awing; % Wing Area [m^2]
-t = aero.t; % Airfoil Maximum Thickness [m]
+h_body = 0.08; % [m] outer diameter
+l_body = 0.5;  % [m] length of body
+t_body = 0.005; % [m] wall thickness
 
-Vbody = A*t; % Body Volume [m^3]
+r_outer = h_body / 2;
+r_inner = r_outer - t_body;
 
-rhomax = mbody/Vbody % Maximum density of body material [kg/m^3]
+V_fuselage = pi * l_body * r_outer^2;
+V_fuselage_shell = pi * l_body * (r_outer^2 - r_inner^2);
+rho_max = m_body/V_fuselage; % Max allowable average body density [kg/m^3]
 
 % XPS
-rhoxps = 55; % Density of XPS [kg/m^3]
+rho_XPS = 55; % Density of XPS [kg/m^3]
 
-fprintf(['\nMATERIAL DENSITY CHECK\nWingspan:\n  b = %i [m]\n' ...
-    'Chord Length:\n  c = %.2f [m]\n' ...
-    'Wing Area:\n  A = %.2f [m^2]\n' ...
-    'Airfoil Maximum Thickness:\n  t = %.2f [m]\n' ...
-    'Body Volume:\n  Vbody = A x t\n        = %.2f [m^3]\n' ...
-    'Max Body Density:\n  rhomax = mbody/Vbody\n         = %.2f [kg/m^3]\n' ...
-    'XPS Density:\n  rhoxps = %i [kg/m^3]\n'], ...
-    b, c, A, t, Vbody, rhomax, rhoxps);
+fprintf('\nMATERIAL DENSITY CHECK\n');
+fprintf('  Fuselage Volume:\n    V_fuselage = %.6f [m^3]\n', V_fuselage);
+fprintf('  Max Allowable Density:\n    rho_max = %.2f [kg/m^3]\n', rho_max);
 
-fprintf('\nXPS Material Density Check:');
-if rhomax > rhoxps
-    fprintf('\n  ✓ Low enough density.\n');
+fprintf('\nXPS Density:\n   rho_XPS    = %.2f [kg/m^3]\n', rho_XPS);
+fprintf('Density Ratio (XPS) = %.2f\n', rho_max / rho_XPS);
+if rho_XPS < rho_max
+    fprintf('   ✓ XPS meets density requirement.\n');
 else
-    fprintf('\n  ✗ NOT low enough density.\n');
+    fprintf('   ✗ XPS too heavy.\n');
 end
-fprintf(['\nDensity Ratio = rhomax/rhoxps\n' ...
-    '              = %.2f\n'], rhomax/rhoxps);
-%% Impact velocity - assuming worst-case free fall from height h
-vcruise = aero.vcruise;
-h = aero.h; % Fall height [m]
-vfall = sqrt(2 * g * h); 
-vimpact = sqrt(vcruise^2 + vfall^2); % Impact velocity [m/s]
-d_stop = 0.05; % Stopping distance on grass field [m]
-Aimpact = aero.t^2; % Impact area [m^2] (Assumed impact area)
-comp_xps = 450E3; % Compressive Strength of XPS [Pa]
 
-% Calculate the maximum height the material can withstand
-h_max = abs((Aimpact * comp_xps * d_stop) / (m * g) - (vcruise^2 / (2 * g)));
+m_body_XPS = rho_XPS * V_fuselage; % XPS body mass [kg]
+fprintf('  XPS Body Volume:\n    V_fuselage_shell = %.6f [m^3]\n', V_fuselage);
+fprintf('  XPS Body Mass:\n    m_body_XPS = %.2f [kg]\n', m_body_XPS);
 
-% Display result
-fprintf('\nMAXIMUM ALTITUDE XPS CAN WITHSTAND\n');
-fprintf('Maximum fall height: h = %.2f meters\n', h_max);
+%% Add PLA Shell Material Check
+fprintf('\n\nPLA SHELL CHECK\n');
+
+rho_max = m_body/V_fuselage_shell; % Max allowable average body density [kg/m^3]
+rho_PLA = 1240; % Density of PLA [kg/m^3]
+
+fprintf('\nPLA Density:\n   rho_PLA    = %.2f [kg/m^3]\n', rho_PLA);
+fprintf('Density Ratio (PLA) = %.2f\n', rho_max / rho_PLA);
+if rho_PLA < rho_max
+    fprintf('  ✓ PLA meets density requirement.\n');
+else
+    fprintf('  ✗ PLA too heavy.\n');
+end
+
+m_body_PLA = rho_PLA * V_fuselage_shell; % PLA shell mass [kg]
+fprintf('  PLA Shell Volume:\n    V_fuselage = %.6f [m^3]\n', V_fuselage_shell);
+fprintf('  PLA Shell Mass:\n    m_body_PLA = %.2f [kg]\n', m_body_PLA);
 
 %% Save Variables
 save("fuselage_materials.mat")

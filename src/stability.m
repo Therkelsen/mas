@@ -16,11 +16,11 @@ Lambda_LE_rad = deg2rad(Lambda_LE); % [rad]
 x_airfoil = 0.16;
 x_np = x_airfoil + 1/4 * aero.c * (1 - tan(Lambda_LE_rad)); % Neutral Point [m]
 
-l_body = 0.5; % Body length [m]
-lh = l_body - x_np; % horizontal tail moment arm [m]
-ch = 0.125;         % chord length of horizontal rudder [m]
-bh = 0.35;          % wingspan of horizontal rudder [m]
-Ah = ch*bh;         % Area of horizontal rudder [m^2]
+l_body = fuse.l_body; % Body length [m]
+lh = l_body - x_np;   % horizontal tail moment arm [m]
+ch = 0.125;           % chord length of horizontal rudder [m]
+bh = 0.35;            % wingspan of horizontal rudder [m]
+Ah = ch*bh;           % Area of horizontal rudder [m^2]
 
 V_horizontal = Ah*aero.h_spar;
 m_horizontal = V_horizontal * wing.rhobalsa;
@@ -75,10 +75,10 @@ fprintf('  Neutral Point:\n    x_np = %.4f [m]\n', x_np);
 
 m_rudder = m_vertical*m_horizontal;
 
-m_airfoil = aero.Vwing * fuse.rhoxps - wing.mbeam;
+m_airfoil = aero.Vwing * fuse.rho_XPS - wing.mbeam;
 
 % Masses of objects [kg]
-M_vec = [aero.m_body - m_airfoil, aero.m_motor, ...
+M_vec = [fuse.m_body_PLA - m_airfoil, aero.m_motor, ...
           aero.m_payload, m_airfoil, ...
           aero.m_battery, m_rudder];
 
@@ -90,7 +90,7 @@ l_rudder = ch; % Rudder Chord Length
 % Lengths of objects
 l_vec = [l_body, l_motor, l_payload, aero.c, l_battery, l_rudder];
 
-h_body = 0.08; % Body height 80 mm
+h_body = fuse.h_body; % Body height 80 mm
 h_motor = 0.035; % Motor height 35 mm
 h_payload = 0.064; % Payload height 64 mm
 h_battery = 0.0075; % Battery height 7.5 mm
