@@ -13,17 +13,17 @@ fprintf('  Wing Sweep Angle:\n    Lambda_LE = %i°\n', Lambda_LE)
 
 Lambda_LE_rad = deg2rad(Lambda_LE); % [rad]
 
-x_airfoil = 0.16;
+x_airfoil = 0.15;
 x_np = x_airfoil + 1/4 * aero.c * (1 - tan(Lambda_LE_rad)); % Neutral Point [m]
 
 l_body = 0.5; % Body length [m]
 lh = l_body - x_np; % horizontal tail moment arm [m]
-ch = 0.125;         % chord length of horizontal rudder [m]
-bh = 0.35;          % wingspan of horizontal rudder [m]
+ch = 0.25;         % chord length of horizontal rudder [m]
+bh = 0.25;          % wingspan of horizontal rudder [m]
 Ah = ch*bh;         % Area of horizontal rudder [m^2]
 
 V_horizontal = Ah*aero.h_spar;
-m_horizontal = V_horizontal * wing.rhobalsa;
+m_horizontal = V_horizontal * wing.rhobalsa
 
 Vh = (Ah*lh)/(aero.Awing*aero.c); % Horizontal Tail Volume Coeff
 
@@ -45,12 +45,12 @@ else
 end
 
 lv = lh;            % vertical tail moment arm [m]
-cv = ch*0.55;       % chord length of vertical rudder [m]
-bv = ch*0.85;       % Wingspan of vertical rudder [m]
+cv = ch*0.5;       % chord length of vertical rudder [m]
+bv = ch*0.5;       % wingspan of vertical rudder [m]
 Av = cv*bv;         % Area of vertical rudder [m^2]
 
 V_vertical = Av*aero.h_spar;
-m_vertical = V_vertical * wing.rhobalsa;
+m_vertical = V_vertical * wing.rhobalsa
 
 Vv = (Av*lv)/(aero.Awing*aero.b); % vertical Tail Volume Coeff
 
@@ -82,6 +82,12 @@ M_vec = [aero.m_body - m_airfoil, aero.m_motor, ...
           aero.m_payload, m_airfoil, ...
           aero.m_battery, m_rudder];
 
+x_body = 0; % Body x-position [m]
+x_motor = 0; % Motor x-position [m]
+x_payload = 0.045; % Payload x-position [m]
+x_battery = x_np; % Battery x-position [m]
+x_rudder = l_body; % Wing position
+
 l_motor = 0.045; % Motor length [m]
 l_payload = 0.09; % Payload length [m]
 l_battery = 0.055; % Battery length [m]
@@ -94,26 +100,18 @@ h_body = 0.08; % Body height 80 mm
 h_motor = 0.035; % Motor height 35 mm
 h_payload = 0.064; % Payload height 64 mm
 h_battery = 0.0075; % Battery height 7.5 mm
-h_rudder = bv; % Rudder height
 
-h_vec = [h_body, h_motor, h_payload, aero.h_spar, h_battery, h_rudder];
+h_vec = [h_body, h_motor, h_payload, aero.h_spar, h_battery, bv];
 
 y_body = 0; % Body starting position
 y_motor = h_body/2 - h_motor/2; % Motor starting position
 y_payload = 0; % Payload starting position
 y_battery = h_body; % Battery starting position
 y_airfoil = h_body; % Airfoil starting position
-y_rudder = h_body/2; % Rudder starting position
 
-y_vec = [y_body, y_motor, y_payload, y_airfoil, y_battery, y_rudder];
+y_vec = [y_body, y_motor, y_payload, y_airfoil, y_battery, h_body];
 
 % Positions of objects [m]
-x_body = 0; % Body x-position [m]
-x_motor = 0; % Motor x-position [m]
-x_payload = 0.045; % Payload x-position [m]
-x_battery = x_np; % Battery x-position [m]
-x_rudder = l_body + l_rudder/2; % Wing position
-
 x_vec = [x_body + l_body/2, ...
          x_motor + l_motor/2, ...
          x_payload + l_payload/2, ...
@@ -215,14 +213,8 @@ function plot_mass_stack(M_vec, x_vec, y_vec, l_vec, h_vec, mass_names, x_np, x_
     
     % xlim([-0.05, 0.55])
     % ylim([-0.05, 0.2])
-
-    % Calculate the earliest and latest object positions
-    x_min = min(x_vec + min(l_vec)) - 0.1;  % 0.1 before the earliest object
-    x_max = max(x_vec + min(l_vec)/16) + 0.1;  % 0.1 after the last object
-    
-    % Apply the same limits to both axes
-    xlim([x_min, x_max]);
-    ylim([x_min, x_max]);
+    xlim([-0.01, 0.51])
+    ylim([-0.01, 0.51])
 
     % Plot vertical lines for x_np and x_cg
     h(length(M_vec) + 1) = line([x_np, x_np], ylim, 'Color', 'r', 'LineStyle', '--', 'LineWidth', 2); % Red line for x_np

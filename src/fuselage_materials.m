@@ -20,7 +20,7 @@ fprintf(['\nDRONE PARAMETERS\nMass of Drone:\n  m = %.2f [kg]\n' ...
 %% Is material light enough?
 b = aero.b; % Wingspan [m]
 c = aero.c; % Chord Length [m]
-A = aero.A; % Wing Area [m^2]
+A = aero.Awing; % Wing Area [m^2]
 t = aero.t; % Airfoil Maximum Thickness [m]
 
 Vbody = A*t; % Body Volume [m^3]

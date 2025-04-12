@@ -12,7 +12,7 @@ g = vars.g; % Gravity [m/s^2]
 
 % Wingspan and Spar Dimensions
 b = vars.b; % Wingspan [m]
-h = 0.025; % Spar height [m]
+h = vars.h_spar; % Spar height [m]
 d = 0.004; % Spar depth [m]
 L = b/2; % Spar length (half wingspan) [m]
 
@@ -24,7 +24,7 @@ fprintf(['\nBASIC PARAMETERS\n' ...
     'Wingspan:\n  b = %.2f [m]\n' ...
     'Spar Height:\n  h = %.3f [m]\n' ...
     'Spar Depth:\n  d = %.3f [m]\n' ...
-    'Spar Length:\n  L = %.2f [m]\n'], m, vdash, n, g, b, h, d, L);
+    'Spar Length:\n  L = %.3f [m]\n'], m, vdash, n, g, b, h, d, L);
 
 %% Step 2: Compute Worst-Case Aerodynamic Forces
 FW = m * g; % Weight force of drone [N]
@@ -131,4 +131,4 @@ fprintf(['\nBEAM WEIGHT\nBeam Volume:\n  Vbeam = L x d x h\n        = %g [kg^3]\
     'Beam Mass:\n  mbeam = Vbeam x rhobalsa\n        = %g [kg]\n'], Vbeam, rhobalsa, mbeam)
 
 %% Step 6: Export Data
-save("wing_beam_materials.mat")
+save("wing_spar_materials.mat")
