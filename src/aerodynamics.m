@@ -3,43 +3,44 @@ clc; clear; close all;
 format compact;
 
 %% Reynolds Stuff
-% Kinematic Viscosity (m^2/s) at Temperature (°C)
-T = [0, 15, 25]; % Temperature in Celsius
-nu = [1.34E-05, 1.48E-05, 1.57E-05]; % Kinematic viscosity in m^2/s
+% Kinematic Viscosity (ν) in m^2/s at corresponding Temperature (°C)
+temp_data = [0, 15, 25]; 
+nu_data = [1.34E-05, 1.48E-05, 1.57E-05];
 
-coeffs = polyfit(T, nu, 1);
+% Fit linear model to viscosity data
+coeffs = polyfit(temp_data, nu_data, 1); 
 
-% disp([num2str(coeffs(1), '%.5e') ' * T + ' num2str(coeffs(2), '%.5e')])
+% Estimate kinematic viscosity at given temperature conditions
+T_range = [9, 18, 30]; % [min, avg, max] temperature in °C
+kin_visc_air = polyval(coeffs, T_range); 
 
-temps = [9, 18, 30]; % min, avg, max, in °C
-kin_visc_air = polyval(coeffs, temps); % min, avg, max, in (m^2/s)
+% Cruise condition parameters
+T_cruise = T_range(2);         % Avg temperature
+nu_cruise = kin_visc_air(2);   % ν at average temp
 
-T_fit = linspace(min([T,temps]), max([T,temps]), 100);
-nu_fit = polyval(coeffs, T_fit);
-
-T = temps(2);
-nu = nu_fit(2);
-
-b = 0.65; % Wing span [m]
-c = 0.25; % Chord Length [m]
-h_spar = 0.025; % Spar height [m]
-Awing = c*b; % Wing Area [m^2]
-t = 0.025; % Airfoil Maximum Thickness [m]
+b = 0.65;       % Wing span [m]
+c = 0.25;       % Chord Length [m]
+t = 0.025;      % Max thickness of airfoil [m]
+Awing = c * b;  % Wing Area [m^2]
 Vwing = Awing * t; % Wing Volume [m^3]
-vcruise = 25; % Cruise Speed [m/s]
+vcruise = 25;   % Cruise Speed [m/s]
+
+% Calculate Reynolds number
+Re = (vcruise * c) / nu_cruise;
+
+% Display
 fprintf(['\nWing Area = Wing Span x Chord Length\n' ...
-    '  A = b x c\n    = %i [m] x %.2f [m]\n' ...
-    '    = %.2f [m^2]\n' ...
+    '  A = b x c\n    = %.2f [m] x %.2f [m]\n' ...
+    '    = %.4f [m^2]\n' ...
     'Wing Volume = Wing Area x Wing Thickness\n' ...
-    '  V = A x t\n    = %i [m] x %.3f [m]\n' ...
-    '    = %i [m^3]\n'], ...
-    b, c, Awing, Awing, t, Vwing)
+    '  V = A x t\n    = %.4f [m^2] x %.3f [m]\n' ...
+    '    = %.6f [m^3]\n'], ...
+    b, c, Awing, Awing, t, Vwing);
 
-Re = (vcruise * c) / nu;
-
-fprintf(['\nKinematic Viscosity at T = %i °C:\n  ν = %i [m^2/s]' ...
+fprintf(['\nKinematic Viscosity at T = %.1f °C:\n  ν = %.2e [m^2/s]' ...
     '\nCruise Speed:\n  vcruise = %.2f [m/s]\n' ...
-    '\nReynolds Number:\n  Re = %i\n'], T, nu, vcruise, Re)
+    '\nReynolds Number:\n  Re = %.3e\n'], ...
+    T_cruise, nu_cruise, vcruise, Re);
 
 %% Weight Stuff
 g = 9.82; % Gravity [N]
@@ -49,7 +50,7 @@ m_max = 1.5; % [kg]
 m_payload = 0.4; % [kg]
 m_motor = 0.175; % [kg]
 m_servo = 0.018; % [kg]
-m_battery = 0.120; % [kg]
+m_battery = 0.074; % [kg]
 
 m_comp = m_payload + m_motor + 3*m_servo + m_battery;
 m_body = m_max - m_comp;
@@ -66,8 +67,9 @@ fprintf(['\nWEIGHT\nGravity:\n  g = %.2f [N]\n' ...
 %% Lift Stuff
 T = 18; % Temperature [°C]
 h = 120; % Altitude [m]
-rho = air_density(T, h); % Density of Air [kg/m^3]
-fprintf('\nLIFT\nDensity of Air at %i°C:\n  ρ = %.4f [kg/m3]\n', T, rho)
+[rho, P] = air_density(T, h); % Density of Air [kg/m^3]
+fprintf(['\nLIFT\nDensity of Air at %i°C:\n  ρ = %.4f [kg/m3]\n' ...
+    'Pressure of Air at %i°C:\n  P = %.4f [hPa]\n'], T, rho, T, P/100)
 
 % Airfoil: http://airfoiltools.com/airfoil/details?airfoil=sd7037-il
 % Cl = 0.4; % [dimensionless], measured at alpha = 0%
@@ -104,14 +106,25 @@ FD = 1/2*rho*vcruise^2*Awing*Cd; % Drag Force [N]
 fprintf(['\nDRAG\nDrag Force:\n  FD = %.2f [N]\n'], FD)
 
 %% Thrust Calculation
-% Thrust at 8700 RPM 8.9V
-% We could probably generate more with higher voltages
-% Also this is with an 11x8.5 prop, not 12x6 like we have.
-FT = 14.52; % Thrust [N]
-T = FT/g; % Thrust [kg]
+motor = readtable('motor_data.csv', 'TextType', 'string');
+
+idx = strcmp(motor.Parameter, "Static_Thrust");
+T = motor.Value(idx);
+FT = T*g/9.82/1000;
 
 fprintf(['\nTHRUST\nThrust Force:\n  FT = %.2f [N]\n' ...
     'Thrust Weight:\n  T = %.2f [kg]\n'], FT, T)
+
+% Thrust to Drag ratio
+TDR = FT/FD;
+
+% Is our thrust higher than our drag?
+if (FT>FD)
+    fprintf('\nYes, our thrust is higher than our drag!')
+else
+    fprintf('\nNo, our thrust is not higher than our drag!')
+end
+fprintf('\nThrust/Drag Ratio: %.2f\n\n', TDR)
 
 %% Stall Stuff
 Clstall = 1.35; % Coefficient of Lift at Stall
@@ -134,13 +147,56 @@ if (vcruise>vstall)
 else
     fprintf('\nNo, our cruise speed is\nnot high enough to not stall!')
 end
-fprintf('\nCruise/Stall Ratio: %.2f\n', CSR)
+fprintf('\nCruise/Stall Ratio: %.2f\n\n', CSR)
+
+%% Aileron Sizing
+Ix = (1/12) * m * (b^2); % Estimate of moment of inertia about x-axis [kg·m^2]
+
+desired_roll_rate = deg2rad(200);  % Desired roll rate [rad/s]
+
+% Aileron deflection angle (max)
+delta_a = deg2rad(20);      % Aileron deflection angle [rad]
+
+% Assumed aileron position
+aileron_span_ratio = 0.25;  % Ratio of wing span covered by each aileron
+y_inner = b/2 * (1 - aileron_span_ratio);
+y_outer = b/2;
+y_avg = (y_inner + y_outer) / 2;   % Average distance from centerline
+
+% === Roll Moment Required ===
+% Roll moment needed to reach the desired roll rate
+L_required = desired_roll_rate * Ix;
+
+% === Solve for required aileron area ===
+% Rearranged formula for Cl_delta:
+% Cl = L / (0.5 * rho * vcruise^2 * Awing * b)
+Cl_required = L_required / (0.5 * rho * vcruise^2 * Awing * b);
+
+% Cl_delta approximation:
+% Cl_delta ≈ (pi/4) * (Sa * y_avg) / (Awing * b/2)
+% Solve for Sa (aileron area)
+Sa = (Cl_required / delta_a) * (4 / pi) * (Awing * b/2) / y_avg;
+
+% === Convert area to dimensions ===
+% Assume aileron spans aileron_span_ratio of half the wing span
+aileron_span = b/2 * aileron_span_ratio;
+aileron_chord = Sa / aileron_span;
+
+% === Output Results ===
+fprintf('AILERON SIZING\n');
+fprintf('Required roll moment: %.2f Nm\n', L_required);
+fprintf('Required Cl: %.4f\n', Cl_required);
+fprintf('Estimated aileron area: %.4f m^2\n', Sa);
+fprintf('Suggested aileron span: %.3f m\n', aileron_span);
+fprintf('Suggested aileron chord: %.3f m\n', aileron_chord);
+fprintf('Deflection used: %.1f deg\n', rad2deg(delta_a));
+
 
 %% Export Variables
 save("aerodynamics.mat")
 
 %% Functions
-function rho = air_density(T_celsius, h)
+function [rho, P] = air_density(T_celsius, h)
     % Constants
     P0 = 101325; % Sea level standard atmospheric pressure (Pa)
     T0 = 288.15; % Sea level standard temperature (K)
@@ -153,9 +209,9 @@ function rho = air_density(T_celsius, h)
     % Convert temperature to Kelvin
     T = T_celsius + 273.15;
     
-    % Calculate pressure at altitude using barometric formula (valid for h < 11 km)
+    % Calculate pressure at altitude using barometric formula
     P = P0 * (1 - (L * h) / T0)^( (g * M) / (R_univ * L) );
 
-    % Calculate air density using the ideal gas law
+    % Calculate air density
     rho = P / (R_air * T);
 end

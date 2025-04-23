@@ -121,14 +121,14 @@ else
 end
 fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_cfrp/sigmamax, comp_cfrp/sigmamax);
 
-%% Weight of Beam
-Vbeam = L*d*h; % Beam Volume [m^3]
+%% Weight of Spar
+Vspar = L*d*h; % Spar Volume [m^3]
 rhobalsa = 160; % Balsa Density [kg/m^3]
-mbeam = Vbeam*rhobalsa; % Beam Mass [kg]
+mspar = 2*Vspar*rhobalsa; % Spar Mass [kg]
 
-fprintf(['\nBEAM WEIGHT\nBeam Volume:\n  Vbeam = L x d x h\n        = %g [kg^3]\n' ...
+fprintf(['\nBEAM WEIGHT\nSpar Volume:\n  Vspar = L x d x h\n        = %g [kg^3]\n' ...
     'Balsa Density:\n  rhobalsa = %i [kg/m^3]\n' ...
-    'Beam Mass:\n  mbeam = Vbeam x rhobalsa\n        = %g [kg]\n'], Vbeam, rhobalsa, mbeam)
+    'Spar Mass:\n  mspar = Vspar x rhobalsa\n        = %g [kg]\n'], Vspar, rhobalsa, mspar)
 
 %% Step 6: Export Data
 save("wing_spar_materials.mat")

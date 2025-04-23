@@ -3,19 +3,19 @@ format compact;
 
 %% Load Required Data
 aero = load("aerodynamics.mat");
-beam = load("wing_spar_materials.mat");
+spar = load("wing_spar_materials.mat");
 
 m = aero.m; % Drone mass [kg]
 m_comp = aero.m_comp; % Component mass [kg]
-m_beam = beam.mbeam; % Beam mass [kg]
+m_spar = spar.mspar; % Beam mass [kg]
 g = aero.g; % Gravity [m/s^2]
 
-m_body = m - m_comp - m_beam; % Available weight left for body [kg]
+m_body = m - m_comp - m_spar; % Available weight left for body [kg]
 
 fprintf('\nDRONE MASS BUDGET\n');
 fprintf('  Total Drone Mass:\n    m = %.2f [kg]\n', m);
 fprintf('  Component Mass:\n    m_comp = %.2f [kg]\n', m_comp);
-fprintf('  Beam Mass:\n    m_beam = %.2f [kg]\n', m_beam);
+fprintf('  Beam Mass:\n    m_spar = %.2f [kg]\n', m_spar);
 fprintf('  Remaining for Body:\n    m_body = %.2f [kg]\n', m_body);
 
 %% Is material light enough?

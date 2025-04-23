@@ -75,7 +75,7 @@ fprintf('  Neutral Point:\n    x_np = %.4f [m]\n', x_np);
 
 m_rudder = m_vertical*m_horizontal;
 
-m_airfoil = aero.Vwing * fuse.rho_XPS - wing.mbeam;
+m_airfoil = aero.Vwing * fuse.rho_XPS - wing.mspar;
 
 % Masses of objects [kg]
 M_vec = [fuse.m_body_PLA - m_airfoil, aero.m_motor, ...
