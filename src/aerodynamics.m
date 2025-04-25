@@ -38,6 +38,7 @@ grid on;
 b = 0.65;       % Wing span [m]
 c = 0.25;       % Chord Length [m]
 t = 0.025;      % Max thickness of airfoil [m]
+h_spar = 0.025; % Spar height [m]
 Awing = c * b;  % Wing Area [m^2]
 Vwing = Awing * t; % Wing Volume [m^3]
 vcruise = 25;   % Cruise Speed [m/s]

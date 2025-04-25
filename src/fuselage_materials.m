@@ -20,7 +20,7 @@ fprintf('  Remaining for Body:\n    m_body = %.2f [kg]\n', m_body);
 
 %% Is material light enough?
 h_body = 0.08; % [m] outer diameter
-l_body = 0.5;  % [m] length of body
+l_body = 0.45;  % [m] length of body
 t_body = 0.005; % [m] wall thickness
 
 r_outer = h_body / 2;
@@ -63,7 +63,8 @@ else
     fprintf('  ✗ PLA too heavy.\n');
 end
 
-m_body_PLA = rho_PLA * V_fuselage_shell; % PLA shell mass [kg]
+% m_body_PLA = rho_PLA * V_fuselage_shell; % PLA shell mass [kg]
+m_body_PLA = 0.14;
 fprintf('  PLA Shell Volume:\n    V_fuselage = %.6f [m^3]\n', V_fuselage_shell);
 fprintf('  PLA Shell Mass:\n    m_body_PLA = %.2f [kg]\n', m_body_PLA);
 
