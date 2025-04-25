@@ -8,7 +8,7 @@ fuse = load('fuselage_materials.mat');
 %% Stability
 fprintf('\nPITCH STABILITY:\n');
 
-Lambda_LE = 30; % sweep angle [deg]
+Lambda_LE = 20; % sweep angle [deg]
 fprintf('  Wing Sweep Angle:\n    Lambda_LE = %i°\n', Lambda_LE)
 
 Lambda_LE_rad = deg2rad(Lambda_LE); % [rad]
@@ -88,14 +88,13 @@ l_battery = 0.055; % Battery length [m]
 l_rudder = ch; % Rudder Chord Length
 
 % Lengths of objects
-l_vec = [l_body, l_motor, l_payload, aero.c, l_battery, l_rudder];
+l_vec = [l_body, l_motor, l_payload, aero.c * cos(Lambda_LE_rad), l_battery, l_rudder];
 
 h_body = fuse.h_body; % Body height 80 mm
 h_motor = 0.035; % Motor height 35 mm
 h_payload = 0.06; % Payload height 6 mm
 h_battery = 0.0075; % Battery height 7.5 mm
 h_rudder = bv; % Rudder height
-
 h_vec = [h_body, h_motor, h_payload, aero.h_spar, h_battery, h_rudder];
 
 y_body = 0; % Body starting position
@@ -119,7 +118,7 @@ x_vec = [x_body + l_body/2, ...
          x_payload + l_payload/2, ...
          x_airfoil + aero.c/2, ...
          x_battery + l_battery/2, ...
-         x_rudder]
+         x_rudder];
 
 mass_names = {'Body', 'Motor', 'Payload', 'Airfoil', 'Battery', 'Wing'};
 
