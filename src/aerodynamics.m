@@ -18,6 +18,23 @@ kin_visc_air = polyval(coeffs, T_range);
 T_cruise = T_range(2);         % Avg temperature
 nu_cruise = kin_visc_air(2);   % ν at average temp
 
+% Generate smooth line for fitted model
+T_fit = linspace(min([temp_data, T_range])-5, max([temp_data, T_range])+5, 100);
+nu_fit = polyval(coeffs, T_fit);
+
+% Plot
+figure;
+plot(T_fit, nu_fit, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Linear fit');
+hold on;
+plot(temp_data, nu_data, 'o', 'MarkerFaceColor', 'b', 'DisplayName', 'Measured data');
+plot(T_range, kin_visc_air, 'ks', 'MarkerFaceColor', 'g', 'DisplayName', 'Estimated values');
+
+xlabel('Temperature (°C)');
+ylabel('Kinematic Viscosity (m^2/s)');
+title('Kinematic Viscosity of Air vs Temperature');
+legend('Location', 'northwest');
+grid on;
+
 b = 0.65;       % Wing span [m]
 c = 0.25;       % Chord Length [m]
 t = 0.025;      % Max thickness of airfoil [m]
@@ -85,10 +102,15 @@ fprintf(['Lift Force:\n' ...
 
 %% Airfoil Stuff
 airfoil = readtable('xf-sd7037-il-500000.csv', 'HeaderLines', 10);
+
+% Target lift coefficient
 Cd = 0; % Drag Coefficient
 alpha = 0; % Angle of Attack [°]
 tol = 0.005;
+
+% Find matching index
 indices = find(abs(airfoil.Cl - Cl) <= tol);
+
 fprintf('\nAIRFOIL')
 if ~isempty(indices)
     Cd = airfoil.Cd(indices(1));
@@ -99,6 +121,41 @@ if ~isempty(indices)
 else
     fprintf('\nNo matching Cl found within tolerance.\n');
 end
+
+% Extract relevant data
+Cl_data = airfoil.Cl;
+Cd_data = airfoil.Cd;
+alpha_data = airfoil.Alpha;
+
+% Plot Cl vs Cd
+figure;
+plot(Cd_data, Cl_data, 'b.-', 'HandleVisibility', 'off');
+hold on;
+if ~isempty(indices)
+    xline(Cd, 'k--', 'HandleVisibility', 'off');
+    yline(Cl, 'k--', 'HandleVisibility', 'off');
+    plot(Cd, Cl, 'ks', 'MarkerFaceColor', 'g', 'MarkerSize', 8, 'DisplayName', sprintf('(C_L, C_D) = (%.2f, %.2f)', Cl, Cd));
+end
+xlabel('C_D');
+ylabel('C_L');
+title('Lift Coefficient vs Drag Coefficient');
+legend('Location', 'best');
+grid on;
+
+% Plot Cl vs Alpha
+figure;
+plot(alpha_data, Cl_data, 'r.-', 'HandleVisibility', 'off');
+hold on;
+if ~isempty(indices)
+    xline(alpha, 'k--', 'HandleVisibility', 'off');
+    yline(Cl, 'k--', 'HandleVisibility', 'off');
+    plot(alpha, Cl, 'ks', 'MarkerFaceColor', 'g', 'MarkerSize', 8, 'DisplayName', sprintf('(C_L, \\alpha) = (%.2f, %.2f°)', Cl, alpha));
+end
+xlabel('\alpha [°]');
+ylabel('C_L');
+title('Lift Coefficient vs Angle of Attack');
+legend('Location', 'best');
+grid on;
 
 %% Drag Stuff
 FD = 1/2*rho*vcruise^2*Awing*Cd; % Drag Force [N]
@@ -200,7 +257,7 @@ function [rho, P] = air_density(T_celsius, h)
     % Constants
     P0 = 101325; % Sea level standard atmospheric pressure (Pa)
     T0 = 288.15; % Sea level standard temperature (K)
-    g = 9.80665; % Gravitational acceleration (m/s²)
+    g = 9.82; % Gravitational acceleration (m/s²)
     M = 0.0289644; % Molar mass of Earth's air (kg/mol)
     R_univ = 8.3144598; % Universal gas constant (J/(mol·K))
     R_air = 287.05; % Specific gas constant for dry air (J/(kg·K))
