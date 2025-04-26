@@ -48,6 +48,30 @@ fprintf(['\nSTRESS CALCULATION\nMaximum Moment:\n  M_max = %.4f [Nm]\n' ...
     'Maximum Stress:\n  σmax = %.4f [Pa]\n       = %.4f [MPa]\n'], Mmax, I, sigmamax, sigmamax/(1E6));
 
 %% Step 4: Material Selection
+%% XPS Foam
+Exps = 3.34E9; % Young's Modulus for XPS [Pa]
+epsilon_xps = sigmamax / Exps;
+
+tens_xps = 250E3; % Tensile Strength [Pa]
+comp_xps = 450E3; % Compressive Strength [Pa]
+
+fprintf(['\nEXTRUDED POLYSTYRENE FOAM\nYoung’s Modulus:\n  Exps = %g [Pa]\nStrain:\n  εxps = %.2e\n' ...
+    'Tensile Strength:\n  σt = %i [Pa]\n' ...
+    'Compressive Strength:\n  σc = %i [Pa]\n'], Exps, epsilon_xps, tens_xps, comp_xps);
+% Check if XPS is strong enough
+fprintf('\nXPS Material Strength Check:');
+if tens_xps > sigmamax
+    fprintf('\n  ✓ Strong enough in tension.');
+else
+    fprintf('\n  ✗ NOT strong enough in tension.');
+end
+if comp_xps > sigmamax
+    fprintf('\n  ✓ Strong enough in compression.');
+else
+    fprintf('\n  ✗ NOT strong enough in compression.');
+end
+fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_xps/sigmamax, comp_xps/sigmamax);
+
 %% Balsa Wood
 Ebalsa = 2.1E9; % Young's Modulus for Balsa [Pa]
 epsilon_balsa = sigmamax / Ebalsa; % Strain
@@ -72,30 +96,6 @@ else
     fprintf('\n  ✗ NOT strong enough in compression.');
 end
 fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_balsa/sigmamax, comp_balsa/sigmamax);
-
-%% XPS Foam
-Exps = 3.34E9; % Young's Modulus for XPS [Pa]
-epsilon_xps = sigmamax / Exps;
-
-tens_xps = 250E3; % Tensile Strength [Pa]
-comp_xps = 450E3; % Compressive Strength [Pa]
-
-fprintf(['\nEXTRUDED POLYSTYRENE FOAM\nYoung’s Modulus:\n  Exps = %g [Pa]\nStrain:\n  εxps = %.2e\n' ...
-    'Tensile Strength:\n  σt = %i [Pa]\n' ...
-    'Compressive Strength:\n  σc = %i [Pa]\n'], Exps, epsilon_xps, tens_xps, comp_xps);
-% Check if XPS is strong enough
-fprintf('\nXPS Material Strength Check:');
-if tens_xps > sigmamax
-    fprintf('\n  ✓ Strong enough in tension.');
-else
-    fprintf('\n  ✗ NOT strong enough in tension.');
-end
-if comp_xps > sigmamax
-    fprintf('\n  ✓ Strong enough in compression.');
-else
-    fprintf('\n  ✗ NOT strong enough in compression.');
-end
-fprintf('\nStrength Ratios:\n  Tensile = %.2f\n  Compressive = %.2f\n', tens_xps/sigmamax, comp_xps/sigmamax);
 
 %% Carbon Fiber / Epoxy Rods
 Ecfrp = 10E9; % Young's Modulus for CFRP [Pa]

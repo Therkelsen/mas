@@ -208,24 +208,26 @@ end
 fprintf('\nCruise/Stall Ratio: %.2f\n\n', CSR)
 
 %% Aileron Sizing
+% === Aileron Deflection and Position ===
+delta_a = deg2rad(20)      % Aileron deflection angle [rad]
+aileron_span_ratio = 0.25;  % Ratio of wing span covered by each aileron
+
+% === Wing Geometry ===
+y_inner = b/2 * (1 - aileron_span_ratio)
+y_outer = b/2
+y_avg = (y_inner + y_outer) / 2   % Average distance from centerline
+
+% === Moment of Inertia ===
 Ix = (1/12) * m * (b^2); % Estimate of moment of inertia about x-axis [kg·m^2]
 
-desired_roll_rate = deg2rad(200);  % Desired roll rate [rad/s]
-
-% Aileron deflection angle (max)
-delta_a = deg2rad(20);      % Aileron deflection angle [rad]
-
-% Assumed aileron position
-aileron_span_ratio = 0.25;  % Ratio of wing span covered by each aileron
-y_inner = b/2 * (1 - aileron_span_ratio);
-y_outer = b/2;
-y_avg = (y_inner + y_outer) / 2;   % Average distance from centerline
+% === Desired Roll Rate ===
+desired_roll_rate = deg2rad(200)  % Desired roll rate [rad/s]
 
 % === Roll Moment Required ===
 % Roll moment needed to reach the desired roll rate
 L_required = desired_roll_rate * Ix;
 
-% === Solve for required aileron area ===
+% === Solve for Required Aileron Area ===
 % Rearranged formula for Cl_delta:
 % Cl = L / (0.5 * rho * vcruise^2 * Awing * b)
 Cl_required = L_required / (0.5 * rho * vcruise^2 * Awing * b);
@@ -235,7 +237,7 @@ Cl_required = L_required / (0.5 * rho * vcruise^2 * Awing * b);
 % Solve for Sa (aileron area)
 Sa = (Cl_required / delta_a) * (4 / pi) * (Awing * b/2) / y_avg;
 
-% === Convert area to dimensions ===
+% === Convert Aileron Area to Dimensions ===
 % Assume aileron spans aileron_span_ratio of half the wing span
 aileron_span = b/2 * aileron_span_ratio;
 aileron_chord = Sa / aileron_span;
