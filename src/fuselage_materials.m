@@ -19,9 +19,9 @@ fprintf('  Beam Mass:\n    m_spar = %.2f [kg]\n', m_spar);
 fprintf('  Remaining for Body:\n    m_body = %.2f [kg]\n', m_body);
 
 %% Is material light enough?
-h_body = 0.08; % [m] outer diameter
-l_body = 0.45; % [m] length of body
 t_body = 0.005; % [m] wall thickness
+h_body = aero.h_body; % [m] outer diameter
+l_body = aero.l_body; % [m] length of body
 
 r_outer = h_body / 2;
 r_inner = r_outer - t_body;

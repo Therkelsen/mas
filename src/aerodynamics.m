@@ -214,6 +214,89 @@ else
 end
 fprintf('\nCruise/Stall Ratio: %.2f\n\n', CSR)
 
+%% More Thrust
+% Aircraft performance estimation script
+
+% Inputs
+cell_voltage_nominal = 3.7;
+cell_voltage_charged = 4.2;
+num_cells_series = 3;
+
+battery_capacity_mAh = 2200;      % mAh
+battery_C = 30;                   % C-rating
+
+motor_Kv = 870;                   % RPM/V
+motor_max_current = 41;           % Amps
+motor_thrust_ref = 2300;          % grams at 8700 RPM
+motor_RPM_ref = 8700;             % RPM at ~10V
+motor_efficiency = 0.8;           % 0-1
+
+h_body = 0.08; % [m] outer diameter
+l_body = 0.45; % [m] length of body
+
+esc_max_current = 40;
+
+prop_diameter_in = 12;            % inches
+prop_pitch_in = 6;                % inches
+
+Cd_plane = 0.08;
+
+static_to_actual_thrust = 0.65;
+
+% Air density
+rho = 1.225;  % kg/m³ at sea level
+
+% Calculated battery voltages
+battery_voltage_nominal = cell_voltage_nominal * num_cells_series;
+battery_voltage_charged = cell_voltage_charged * num_cells_series;
+
+% Motor RPM and thrust estimation
+motor_RPM = motor_Kv * battery_voltage_charged;
+
+% Adjust the thrust scaling (use a conservative exponent)
+alpha = 2;  % exponent to adjust thrust scaling
+
+scaled_thrust_g = motor_thrust_ref * (motor_RPM / motor_RPM_ref)^alpha;
+scaled_thrust_N = scaled_thrust_g / 1000 * g * static_to_actual_thrust;  % convert thrust to Newtons
+
+% Current estimation (linear scaling with thrust)
+motor_current = motor_max_current * (scaled_thrust_g / motor_thrust_ref);
+motor_current = min(motor_current, esc_max_current);   % ESC current limit
+
+% Battery current capability and estimated flight time
+battery_max_current = (battery_capacity_mAh / 1000) * battery_C;
+flight_time_minutes = (battery_capacity_mAh / 1000) / motor_current * 60;
+
+% Propeller pitch speed estimation (ideal airspeed)
+pitch_speed_mps = (motor_RPM * prop_pitch_in * 0.0254) / 60;
+
+kmh_to_mps = 0.277778;
+
+propcalc_cruise_speed = 94*870/985*kmh_to_mps; % From propcalc
+propcalc_rpm = 9967;
+propcalc_pitch_speed = 81*kmh_to_mps;
+pitch = propcalc_pitch_speed*60/propcalc_rpm;
+K = propcalc_rpm*pitch/propcalc_cruise_speed;
+cruise_speed = (motor_RPM * pitch)/K;
+
+% --- Print Results ---
+fprintf('\n--- Battery ---\n');
+fprintf('Nominal Voltage: %.2f V\n', battery_voltage_nominal);
+fprintf('Charged Voltage: %.2f V\n', battery_voltage_charged);
+fprintf('Max Battery Current (%.0fC): %.1f A\n', battery_C, battery_max_current);
+
+fprintf('\n--- Motor ---\n');
+fprintf('Estimated RPM: %.0f RPM\n', motor_RPM);
+fprintf('Estimated Current Draw: %.1f A\n', motor_current);
+fprintf('Estimated Thrust: %.1f g (%.2f N)\n', scaled_thrust_g, scaled_thrust_N);
+
+fprintf('\n--- Propeller ---\n');
+fprintf('Estimated Pitch Speed: %.1f m/s\n', pitch_speed_mps);
+
+fprintf('\n--- Flight Performance ---\n');
+fprintf('Estimated Flight Time at Full Power: %.1f minutes\n', flight_time_minutes);
+fprintf('Estimated Cruise Speed: %.2f m/s\n', cruise_speed);
+
 %% Aileron Sizing
 % === Aileron Deflection and Position ===
 delta_a = deg2rad(20)      % Aileron deflection angle [rad]
