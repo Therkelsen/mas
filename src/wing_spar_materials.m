@@ -13,7 +13,7 @@ g = vars.g; % Gravity [m/s^2]
 % Wingspan and Spar Dimensions
 b = vars.b; % Wingspan [m]
 h = vars.h_spar; % Spar height [m]
-d = 0.004; % Spar depth [m]
+d = 0.005; % Spar depth [m]
 L = b/2; % Spar length (half wingspan) [m]
 
 fprintf(['\nBASIC PARAMETERS\n' ...

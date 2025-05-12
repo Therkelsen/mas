@@ -60,7 +60,10 @@ else
     fprintf('   ✗ PLA too heavy.\n');
 end
 
-m_PLA = rho_PLA * V_fuse; % PLA shell mass [kg]
-fprintf('PLA Shell Mass:\n    m_PLA = %.2f [kg]\n', m_PLA);
+% m_body_PLA = rho_PLA * V_fuselage_shell; % PLA shell mass [kg]
+m_body_PLA = 0.159;
+fprintf('  PLA Shell Volume:\n    V_fuselage = %.6f [m^3]\n', V_fuselage_shell);
+fprintf('  PLA Shell Mass:\n    m_body_PLA = %.2f [kg]\n', m_body_PLA);
+
 %% Save Variables
 save("fuse_materials.mat")

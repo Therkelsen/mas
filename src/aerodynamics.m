@@ -38,10 +38,11 @@ grid on;
 b = 0.65;       % Wing span [m]
 c = 0.25;       % Chord Length [m]
 t = 0.025;      % Max thickness of airfoil [m]
-h_spar = 0.025; % Spar height [m]
+% h_spar = 0.025; % Spar height [m]
+h_spar = (0.032 + 0.026)/2; % Spar height [m]
 Awing = c * b;  % Wing Area [m^2]
 Vwing = Awing * t; % Wing Volume [m^3]
-vcruise = 25;   % Cruise Speed [m/s]
+vcruise = 18;   % Cruise Speed [m/s]
 
 % Calculate Reynolds number
 Re = (vcruise * c) / nu_cruise;
@@ -67,8 +68,9 @@ m_max = 1.5; % [kg]
 
 m_payload = 0.4; % [kg]
 m_motor = 0.175; % [kg]
-m_servo = 0.018; % [kg]
-m_battery = 0.074; % [kg]
+m_servo = 0.024; % [kg]
+% m_battery = 0.074; % [kg]
+m_battery = 0.180*2;
 
 m_comp = m_payload + m_motor + 3*m_servo + m_battery;
 m_body = m_max - m_comp;
@@ -107,7 +109,7 @@ airfoil = readtable('xf-sd7037-il-500000.csv', 'HeaderLines', 10);
 % Target lift coefficient
 Cd = 0; % Drag Coefficient
 alpha = 0; % Angle of Attack [°]
-tol = 0.005;
+tol = 0.01;
 
 % Find matching index
 indices = find(abs(airfoil.Cl - Cl) <= tol);
@@ -185,9 +187,14 @@ end
 fprintf('\nThrust/Drag Ratio: %.2f\n\n', TDR)
 
 %% Stall Stuff
-Clstall = 1.35; % Coefficient of Lift at Stall
-Cdstall = 0.05; % Coefficient of Drag at Stall
-alphastall = 14; % Degrees
+Clstall = 1.3934; % Coefficient of Lift at Stall
+Cdstall = 0.02657; % Coefficient of Drag at Stall
+alphastall = 11.5; % Degrees
+
+% m_actual = 1.430;
+m_actual = 1.615;
+
+m = m_actual;
 
 % Stall Speed
 vstall = sqrt((2*m*g)/(rho*Awing*Clstall));

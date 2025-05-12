@@ -18,8 +18,8 @@ x_np = x_airfoil + 1/4 * aero.c * (1 - tan(Lambda_LE_rad)); % Neutral Point [m]
 
 l_body = fuse.l_body; % Body length [m]
 lh = l_body - x_np;   % horizontal tail moment arm [m]
-ch = 0.125;           % chord length of horizontal rudder [m]
-bh = 0.35;            % wingspan of horizontal rudder [m]
+ch = 0.16;           % chord length of horizontal rudder [m]
+bh = 0.3;            % wingspan of horizontal rudder [m]
 Ah = ch*bh;           % Area of horizontal rudder [m^2]
 
 V_horizontal = Ah*aero.h_spar;
@@ -44,10 +44,10 @@ else
     disp('Unknown stability margin');
 end
 
-lv = lh;            % vertical tail moment arm [m]
-cv = ch*0.55;       % chord length of vertical rudder [m]
-bv = ch*0.85;       % Wingspan of vertical rudder [m]
-Av = cv*bv;         % Area of vertical rudder [m^2]
+lv = lh;        % vertical tail moment arm [m]bh*0.42
+cv = 0.13;      % chord length of vertical rudder [m]
+bv = 0.1;       % Wingspan of vertical rudder [m]
+Av = cv*bv;     % Area of vertical rudder [m^2]
 
 V_vertical = Av*aero.h_spar;
 m_vertical = V_vertical * wing.rhobalsa;
@@ -75,16 +75,20 @@ fprintf('  Neutral Point:\n    x_np = %.4f [m]\n', x_np);
 
 m_rudder = m_vertical*m_horizontal;
 
-m_airfoil = aero.Vwing * fuse.rho_XPS - wing.mspar;
+m_airfoil = 0.210;
+
+m_body = fuse.m_body_PLA;
 
 % Masses of objects [kg]
-M_vec = [fuse.m_body_PLA, aero.m_motor, ...
+M_vec = [m_body, aero.m_motor, ...
           aero.m_payload, m_airfoil, ...
-          aero.m_battery, m_rudder];
+          aero.m_battery, m_rudder]
+
+m_total = sum(M_vec)
 
 l_motor = 0.045; % Motor length [m]
 l_payload = 0.06; % Payload length [m]
-l_battery = 0.055; % Battery length [m]
+l_battery = 0.115; % Battery length [m]
 l_rudder = ch; % Rudder Chord Length
 
 % Lengths of objects
@@ -93,7 +97,7 @@ l_vec = [l_body, l_motor, l_payload, aero.c * cos(Lambda_LE_rad), l_battery, l_r
 h_body = fuse.h_body; % Body height 80 mm
 h_motor = 0.035; % Motor height 35 mm
 h_payload = 0.06; % Payload height 6 mm
-h_battery = 0.0075; % Battery height 7.5 mm
+h_battery = 0.02; % Battery height 7.5 mm
 h_rudder = bv; % Rudder height
 h_vec = [h_body, h_motor, h_payload, aero.h_spar, h_battery, h_rudder];
 
@@ -110,7 +114,7 @@ y_vec = [y_body, y_motor, y_payload, y_airfoil, y_battery, y_rudder];
 x_body = 0; % Body x-position [m]
 x_motor = 0; % Motor x-position [m]
 x_payload = 0.045; % Payload x-position [m]
-x_battery = 0; % Battery x-position [m]
+x_battery = x_payload + l_payload/2; % Battery x-position [m]
 x_rudder = l_body + l_rudder/2; % Wing position
 
 x_vec = [x_body + l_body/2, ...
